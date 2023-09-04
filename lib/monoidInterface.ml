@@ -28,6 +28,8 @@ let sta' {C : ClearInterface} = C.sta'
 let var' {C : ClearInterface} = C.var'
 let eva' {C : ClearInterface} = C.eva'
 
+(* Really need the T.t to not be hidden *)
+
 module CreateInterface (A : MONOID) (B : MONOID with type t = A.t code) : sig 
   include S.PS with type A.T.t = A.t 
   implicit module OpMonoid : MONOID with type t = T.t 

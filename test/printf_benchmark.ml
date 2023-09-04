@@ -120,14 +120,14 @@ end =
 struct
 
   (* You can't get rid of this, need to define the monoid you're dealing with *)  
-  module String_monoid : Algebra.MONOID with type t = string = struct
+  implicit module String_monoid : Algebra.MONOID with type t = string = struct
     type t = string
     let unit = ""
     let (<*>) = (^)
   end
 
   (* Similarly I don't think this is generalisable so this is also necessary  *)
-  module String_code_monoid : Algebra.MONOID with type t = string code = struct
+  implicit module String_code_monoid : Algebra.MONOID with type t = string code = struct
     type t = string code
     let unit = .<"">.
     let (<*>) x y = .< .~x ^ .~y >.
@@ -161,12 +161,15 @@ struct
     (* let zz : int = E.eva in *)
     .< String.concat "" .~(gen_list (eva' persist lst x)) >.
 
-  let zz : int = cd_string
   
 
   type ('a,'r) t = (Ps_string.T.t -> 'a) -> (Ps_string.T.t -> 'r)
+
+  (* The basic thing is bytes???? And the Free extension is T.t???? Are we representing strings as bytes?*)
+  (* sta' :: bytes -> T.t *)
+
       (* Needed HERE!*)
-  let lit x = fun k -> fun s -> k (s <*> sta' x)
+  let lit (x : bytes) = fun k -> fun s -> k Ps_string.OpMonoid.(s <*> sta' {Ps_string.CI} x)
 
   let (++) f1 f2 = fun k -> f1 (f2 k)
 
@@ -178,7 +181,7 @@ struct
   let int' x = var' (Aux.var .<string_of_int .~x>.)
   let str' x = var' (Aux.var x)
 
-  let (!%) to_str = fun k -> fun s -> fun x -> k (s <*> to_str x)
+  let (!%) to_str = fun k -> fun s -> fun x -> k Ps_string.OpMonoid.(s <*> to_str x)
 
   let int x = !% int' x
   let str x = !% str' x
