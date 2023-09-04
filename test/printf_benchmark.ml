@@ -156,17 +156,13 @@ struct
     | x :: xs -> .< .~x :: .~(gen_list xs) >.
 
   let cd_string x =
-    (* Needed HERE *)
-    let module E = Ps_string.Eva(struct module Op = struct
-                                type t = string code list
-                                let unit = []
-                                let (<*>) = (@)
-                              end
-        module T = struct type t = string code list end
-      end) in
     let lst x = [Aux.cd_of_var x] in
     let persist (s:string) = [.< s >.] in
-    .< String.concat "" .~(gen_list (E.eva persist lst x)) >.
+    (* let zz : int = E.eva in *)
+    .< String.concat "" .~(gen_list (eva' persist lst x)) >.
+
+  let zz : int = cd_string
+  
 
   type ('a,'r) t = (Ps_string.T.t -> 'a) -> (Ps_string.T.t -> 'r)
       (* Needed HERE!*)
