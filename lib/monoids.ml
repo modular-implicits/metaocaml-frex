@@ -121,8 +121,8 @@ struct
   let (<*>) = (@)
 end
 
-module PS_monoid(A : MONOID)(C : MONOID with type t = A.t code) =
-  PS(Free_ext_from_coprod(Monoids)(Split(A))
+implicit module HELLO {A : MONOID}{C : MONOID with type t = A.t code} : S.PS with type A.T.t = A.t = struct 
+  include PS(Free_ext_from_coprod(Monoids)(Split(A))
        (functor (X : Setoid) ->
         struct
           module Z = Monoids.Free(X)
@@ -130,3 +130,33 @@ module PS_monoid(A : MONOID)(C : MONOID with type t = A.t code) =
           module Ops = Algebra.Monoid_ops
         end))
     (Split(C))
+end
+
+(* we want one module to do it all *)
+
+(* Functions needed:
+   eva function 
+   <*> this function 
+
+   *)
+
+
+module PS_monoid(A : MONOID)(C : MONOID with type t = A.t code) : sig
+include S.PS with type A.T.t = A.t
+implicit module OpMonoid : MONOID with type t = T.t end = struct
+  module PS' = PS(Free_ext_from_coprod(Monoids)(Split(A))
+       (functor (X : Setoid) ->
+        struct
+          module Z = Monoids.Free(X)
+          include Coproduct_monoid(Split(A))(Z.Alg)
+          module Ops = Algebra.Monoid_ops
+        end))
+    (Split(C))
+  include PS'
+
+  implicit module OpMonoid : MONOID with type t = T.t = struct
+    type t = T.t
+    let unit = Op.unit
+    let (<*>) = Op.(<*>)
+  end 
+end 

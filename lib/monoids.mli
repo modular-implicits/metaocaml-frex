@@ -7,5 +7,8 @@ module Free_monoid (A : Algebra.TYPE) :
   Algebra.MONOID with type t = A.t list
 
 module PS_monoid (A : Algebra.MONOID)
-    (C : Algebra.MONOID with type t = A.t code) : S.PS with type A.T.t = A.t
+    (C : Algebra.MONOID with type t = A.t code) : sig 
+      include S.PS with type A.T.t = A.t
+      implicit module OpMonoid : Algebra.MONOID with type t = T.t end
+
 

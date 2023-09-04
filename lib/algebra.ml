@@ -28,6 +28,13 @@ module type MONOID = sig
   val (<*>) : t -> t -> t
 end
 
+module I = struct 
+  let unit {M : MONOID} = M.unit 
+  let (<*>) {M : MONOID} = M.(<*>)
+end 
+
+
+
 module Monoid_ops (T: TYPE) =
 struct
   module type OP = MONOID with type t := T.t

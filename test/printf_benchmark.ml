@@ -1,3 +1,4 @@
+open Algebra.I;;
 (* A small-scale example illustrating partially-static monoids.
 
    References for the unstaged printf function:
@@ -117,6 +118,7 @@ sig
   val sprintf : (string code, 'a) t -> 'a
 end =
 struct
+  
   module String_monoid : Algebra.MONOID with type t = string = struct
     type t = string
     let unit = ""
@@ -129,19 +131,29 @@ struct
     let (<*>) x y = .< .~x ^ .~y >.
   end
 
-  module Ps_string = Monoids.PS_monoid(String_monoid)(String_code_monoid)
+
+  
+  module Ps_string = Monoids.PS_monoid(String_monoid)(Instances.To_Code{String_monoid})
   (* module Ps_monoid = (\* Monoids.MkMONOID *\)(Ps_string) *)
 
   open Ps_string
-  open Ps_string.Op
+  (* open Ps_string.Op *)
   (* open Ps_monoid *)
+
+  (*
+  implicit module Ops_Monoid : Algebra.MONOID with type t = Ps_string.T.t = struct
+    type t = Ps_string.T.t
+    let unit = Ps_string.Op.unit
+    let (<*>) = Ps_string.Op.(<*>)
+  end *)
 
   let rec gen_list : string code list -> string list code = function
     | [] -> .< [] >.
     | x :: xs -> .< .~x :: .~(gen_list xs) >.
 
   let cd_string x =
-    let module E = Eva(struct module Op = struct
+    (* Needed HERE *)
+    let module E = Ps_string.Eva(struct module Op = struct
                                 type t = string code list
                                 let unit = []
                                 let (<*>) = (@)
@@ -153,15 +165,18 @@ struct
     .< String.concat "" .~(gen_list (E.eva persist lst x)) >.
 
   type ('a,'r) t = (Ps_string.T.t -> 'a) -> (Ps_string.T.t -> 'r)
-
-  let lit x = fun k -> fun s -> k (s <*> sta x)
+      (* Needed HERE!*)
+  let lit x = fun k -> fun s -> k (s <*> Ps_string.sta x)
 
   let (++) f1 f2 = fun k -> f1 (f2 k)
 
-  let sprintf p = p (fun s -> cd_string s) unit
+  (* Sadly need to pass implicit here *)
 
-  let int' x = var (Aux.var .<string_of_int .~x>.)
-  let str' x = var (Aux.var x)
+  let sprintf p = p (fun s -> cd_string s) (unit {Ps_string.OpMonoid})
+
+      (* Needed Here!*)
+  let int' x = Ps_string.var (Aux.var .<string_of_int .~x>.)
+  let str' x = Ps_string.var (Aux.var x)
 
   let (!%) to_str = fun k -> fun s -> fun x -> k (s <*> to_str x)
 
