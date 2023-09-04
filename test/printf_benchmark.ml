@@ -118,25 +118,29 @@ sig
   val sprintf : (string code, 'a) t -> 'a
 end =
 struct
-  
+
+  (* You can't get rid of this, need to define the monoid you're dealing with *)  
   module String_monoid : Algebra.MONOID with type t = string = struct
     type t = string
     let unit = ""
     let (<*>) = (^)
   end
 
+  (* Similarly I don't think this is generalisable so this is also necessary  *)
   module String_code_monoid : Algebra.MONOID with type t = string code = struct
     type t = string code
     let unit = .<"">.
     let (<*>) x y = .< .~x ^ .~y >.
   end
 
-
+  open MonoidInterface;;
   
-  module Ps_string = Monoids.PS_monoid(String_monoid)(Instances.To_Code{String_monoid})
+  module Ps_string = MonoidInterface.CreateInterface(String_monoid)(String_code_monoid)
   (* module Ps_monoid = (\* Monoids.MkMONOID *\)(Ps_string) *)
 
   open Ps_string
+
+  (* let x : int = Ps_string.var *)
   (* open Ps_string.Op *)
   (* open Ps_monoid *)
 
@@ -166,7 +170,7 @@ struct
 
   type ('a,'r) t = (Ps_string.T.t -> 'a) -> (Ps_string.T.t -> 'r)
       (* Needed HERE!*)
-  let lit x = fun k -> fun s -> k (s <*> Ps_string.sta x)
+  let lit x = fun k -> fun s -> k (s <*> sta' x)
 
   let (++) f1 f2 = fun k -> f1 (f2 k)
 
@@ -175,8 +179,8 @@ struct
   let sprintf p = p (fun s -> cd_string s) (unit {Ps_string.OpMonoid})
 
       (* Needed Here!*)
-  let int' x = Ps_string.var (Aux.var .<string_of_int .~x>.)
-  let str' x = Ps_string.var (Aux.var x)
+  let int' x = var' (Aux.var .<string_of_int .~x>.)
+  let str' x = var' (Aux.var x)
 
   let (!%) to_str = fun k -> fun s -> fun x -> k (s <*> to_str x)
 
