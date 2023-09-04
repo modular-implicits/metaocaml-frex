@@ -121,22 +121,7 @@ struct
   let (<*>) = (@)
 end
 
-(* we want one module to do it all *)
-
-(* Functions needed:
-   eva function 
-   <*> this function 
-
-   *)
-
-module type ClearInterface = sig
-  type t
-  type l
-  val sta' : l -> t
-  val var' : l Aux.var -> t
-end
-
-module PS_monoid'(A : MONOID)(C : MONOID with type t = A.t code) =
+module PS_monoid(A : MONOID)(C : MONOID with type t = A.t code) =
   PS(Free_ext_from_coprod(Monoids)(Split(A))
        (functor (X : Setoid) ->
         struct
@@ -145,31 +130,3 @@ module PS_monoid'(A : MONOID)(C : MONOID with type t = A.t code) =
           module Ops = Algebra.Monoid_ops
         end))
     (Split(C))
-
-module PS_monoid(A : MONOID)(C : MONOID with type t = A.t code) : sig
-include S.PS with type A.T.t = A.t
-implicit module OpMonoid : MONOID with type t = T.t 
-implicit module CI : ClearInterface with type t = T.t and type l = A.T.t end = struct
-  module PS' = PS(Free_ext_from_coprod(Monoids)(Split(A))
-       (functor (X : Setoid) ->
-        struct
-          module Z = Monoids.Free(X)
-          include Coproduct_monoid(Split(A))(Z.Alg)
-          module Ops = Algebra.Monoid_ops
-        end))
-    (Split(C))
-  include PS'
-
-  implicit module OpMonoid : MONOID with type t = T.t = struct
-    type t = T.t
-    let unit = Op.unit
-    let (<*>) = Op.(<*>)
-  end 
-
-  implicit module CI : ClearInterface with type t = T.t and type l = A.T.t = struct
-    type t = T.t
-    type l = A.T.t
-    let sta' = PS'.sta
-    let var' = PS'.var
-  end
-end 

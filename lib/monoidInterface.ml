@@ -27,7 +27,7 @@ module CreateInterface (A : MONOID) (B : MONOID with type t = A.t code) : sig
   implicit module CI : ClearInterface with type t = T.t and type l = A.T.t 
   end = struct 
   
-    module PS = PS_monoid'(A)(B) 
+    module PS = PS_monoid(A)(B) 
     include PS
 
     implicit module OpMonoid : MONOID with type t = T.t = struct
