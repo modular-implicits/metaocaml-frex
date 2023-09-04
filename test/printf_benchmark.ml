@@ -160,10 +160,8 @@ struct
     let persist (s:string) = [.< s >.] in
     (* let zz : int = E.eva in *)
     .< String.concat "" .~(gen_list (eva' persist lst x)) >.
-
-  let zz : int = cd_string
   
-
+    (* Really need to unhide this T.t type !*)
   type ('a,'r) t = (Ps_string.T.t -> 'a) -> (Ps_string.T.t -> 'r)
       (* Needed HERE!*)
   let lit x = fun k -> fun s -> k (s <*> sta' x)
@@ -173,6 +171,7 @@ struct
   (* Sadly need to pass implicit here *)
 
   let sprintf p = p (fun s -> cd_string s) (unit {Ps_string.OpMonoid})
+    let z : int = sprintf
 
       (* Needed Here!*)
   let int' x = var' (Aux.var .<string_of_int .~x>.)
