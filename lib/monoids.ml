@@ -121,17 +121,6 @@ struct
   let (<*>) = (@)
 end
 
-implicit module HELLO {A : MONOID}{C : MONOID with type t = A.t code} : S.PS with type A.T.t = A.t = struct 
-  include PS(Free_ext_from_coprod(Monoids)(Split(A))
-       (functor (X : Setoid) ->
-        struct
-          module Z = Monoids.Free(X)
-          include Coproduct_monoid(Split(A))(Z.Alg)
-          module Ops = Algebra.Monoid_ops
-        end))
-    (Split(C))
-end
-
 (* we want one module to do it all *)
 
 (* Functions needed:
