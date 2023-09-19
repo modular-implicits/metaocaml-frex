@@ -8,4 +8,3 @@ module Free_monoid (A : Algebra.TYPE) :
 
 module PS_monoid (A : Algebra.MONOID)
     (C : Algebra.MONOID with type t = A.t code) : S.PS with type A.T.t = A.t
-

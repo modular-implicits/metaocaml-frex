@@ -6,3 +6,5 @@ Commutative_rings
 Monads
 Monoids
 Sets
+MonoidInterface
+CommonInterface
